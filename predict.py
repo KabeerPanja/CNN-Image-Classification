@@ -1,5 +1,5 @@
 import numpy as np
-import cv2
+from PIL import Image
 
 from keras.models import load_model
 from keras.preprocessing.image import img_to_array
@@ -14,25 +14,16 @@ def get_model():
         model = load_model("models/cnn_model.h5")
     return model
 
-def predict_image(image, class_names):
-
-    image = np.array(image)
-
-    image = cv2.resize(image, (IMAGE_SIZE, IMAGE_SIZE))
-
-    image = image.astype("float") / 255.0
-
-    image = img_to_array(image)
-
+def predict_image(image, labels):
+    image = image.resize((128, 128))
+    image = np.array(image) / 255.0
     image = np.expand_dims(image, axis=0)
 
-    model = get_model()
     prediction = model.predict(image)[0]
 
-    predicted_index = np.argmax(prediction)
+    class_index = np.argmax(prediction)
+    confidence = np.max(prediction)
 
-    confidence = prediction[predicted_index] * 100
+    class_name = list(labels.keys())[list(labels.values()).index(class_index)]
 
-    predicted_label = class_names[predicted_index]
-
-    return predicted_label, confidence
+    return class_name, confidence
