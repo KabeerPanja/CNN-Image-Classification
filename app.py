@@ -100,10 +100,11 @@ elif menu == "Train Model":
 
         with st.spinner("Training model..."):
 
-            accuracy, class_names = train_model()
+            model, history, X_test, y_test, labels = train_model()
+
+            accuracy = max(history.history['val_accuracy'])
 
             st.success("Training Completed")
-
             st.write(f"Final Validation Accuracy: {accuracy * 100:.2f}%")
 
             st.subheader("Accuracy Graph")
