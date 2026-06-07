@@ -1,55 +1,43 @@
 import os
-import cv2
+from PIL import Image
 import numpy as np
-from keras.preprocessing.image import img_to_array
 
-IMAGE_SIZE = 128
-
-
+# Create class folder
 def create_class_folder(class_name):
     path = os.path.join("dataset", class_name)
     os.makedirs(path, exist_ok=True)
     return path
 
-
+# Save uploaded images
 def save_uploaded_images(uploaded_files, class_name):
-    folder = create_class_folder(class_name)
+    path = create_class_folder(class_name)
 
-    for file in uploaded_files:
-        file_path = os.path.join(folder, file.name)
+    for i, file in enumerate(uploaded_files):
+        image = Image.open(file)
+        image = image.convert("RGB")
+        image.save(os.path.join(path, f"{class_name}_{i}.jpg"))
 
-        with open(file_path, "wb") as f:
-            f.write(file.getbuffer())
+# Load dataset for training
+def load_dataset(img_size=(128, 128)):
+    X = []
+    y = []
+    labels = {}
 
+    base_dir = "dataset"
+    class_names = os.listdir(base_dir)
 
-def load_dataset():
-    data = []
-    labels = []
+    for idx, class_name in enumerate(class_names):
+        labels[class_name] = idx
+        class_path = os.path.join(base_dir, class_name)
 
-    dataset_path = "dataset"
+        for img_file in os.listdir(class_path):
+            img_path = os.path.join(class_path, img_file)
 
-    class_names = sorted(os.listdir(dataset_path))
+            image = Image.open(img_path)
+            image = image.resize(img_size)
+            image = np.array(image) / 255.0
 
-    for class_name in class_names:
-        class_path = os.path.join(dataset_path, class_name)
+            X.append(image)
+            y.append(idx)
 
-        if not os.path.isdir(class_path):
-            continue
-
-        for image_name in os.listdir(class_path):
-            image_path = os.path.join(class_path, image_name)
-
-            try:
-                image = cv2.imread(image_path)
-                image = cv2.resize(image, (IMAGE_SIZE, IMAGE_SIZE))
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                image = img_to_array(image)
-                image = image / 255.0
-
-                data.append(image)
-                labels.append(class_name)
-
-            except:
-                pass
-
-    return np.array(data), np.array(labels), class_names
+    return np.array(X), np.array(y), labels
