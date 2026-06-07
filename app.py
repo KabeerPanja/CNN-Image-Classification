@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from PIL import Image
 from utils import create_class_folder, save_uploaded_images
 from train import train_model
