@@ -1,10 +1,6 @@
-import os
 import streamlit as st
 from PIL import Image
-
-from utils import create_class_folder
-from utils import save_uploaded_images
-
+from utils import create_class_folder, save_uploaded_images
 from train import train_model
 from predict import predict_image
 
